@@ -1,18 +1,44 @@
-#!/usr/bin/python3
-from sys import argv
+import sys
+import math
 
-with open(argv[1]) as f:
-    for line in f:
-        n = int(line)
-        print("{:d}=".format(n), end="")
-        if n % 2 == 0:
-            print("{}*2".format(n//2))
-            continue
-        for i in range(3, n, 2):
-            if n % i == 0:
-                factor = n//i
-                for j in range(3, factor, 2):
-                    if factor % j == 0 or i % j == 0:
-                        break
-                print("{}*{}".format(factor, i))
-                break
+def is_prime(num):
+    if num < 2:
+        return False
+    if num == 2:
+        return True
+    if num % 2 == 0:
+        return False
+    for i in range(3, int(math.sqrt(num)) + 1, 2):
+        if num % i == 0:
+            return False
+    return True
+
+def factorize_rsa(n):
+    for p in range(2, n):
+        if is_prime(p) and n % p == 0:
+            q = n // p
+            if is_prime(q):
+                return p, q
+    return None, None
+
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: rsa <file>")
+        sys.exit(1)
+
+    input_file = sys.argv[1]
+
+    try:
+        with open(input_file, 'r') as file:
+            for line in file:
+                n = int(line)
+                p, q = factorize_rsa(n)
+                if p is not None and q is not None:
+                    print(f"{n}={p}*{q}")
+                else:
+                    print(f"Unable to factorize {n}")
+    except FileNotFoundError:
+        print("Input file not found.")
+
+if __name__ == "__main__":
+    main()
